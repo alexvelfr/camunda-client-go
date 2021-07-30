@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-const PackageVersion = "v0.0.1"
+const PackageVersion = "v0.0.2"
 const DefaultUserAgent = "CamundaClientGo/" + PackageVersion
 const DefaultEndpointUrl = "http://localhost:8080/engine-rest"
 const DefaultTimeoutSec = 60
