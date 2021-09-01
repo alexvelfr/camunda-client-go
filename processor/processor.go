@@ -105,7 +105,7 @@ func (c *Context) BindVariables(dest interface{}) error {
 			if err != nil {
 				return err
 			}
-			rvelm.Field(i).Set(dst)
+			rvelm.Field(i).Set(dst.Elem())
 		}
 	}
 	return nil
