@@ -99,10 +99,13 @@ func (c *Context) BindVariables(dest interface{}) error {
 			rvelm.Field(i).SetBool(cv.Value.(bool))
 		case "obj", "object":
 			bt := []byte(cv.Value.(string))
-			err := json.Unmarshal(bt, rvelm.Field(i).Interface())
+			dst := reflect.New(rvelm.Field(i).Type().Elem())
+			p := dst.Interface()
+			err := json.Unmarshal(bt, p)
 			if err != nil {
 				return err
 			}
+			rvelm.Field(i).Set(dst)
 		}
 	}
 	return nil
