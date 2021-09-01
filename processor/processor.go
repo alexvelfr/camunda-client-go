@@ -4,11 +4,18 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"reflect"
 	"runtime/debug"
+	"strings"
 	"time"
 
 	camundaclientgo "github.com/alexvelfr/camunda-client-go/v2"
 )
+
+const tagName string = "camunda"
+
+var ErrInvalidUnmarshal = errors.New("invalid unmarhsal error")
+var ErrEmptyVariables = errors.New("empty variables")
 
 // Processor external task processor
 type Processor struct {
@@ -57,6 +64,41 @@ type Handler func(ctx *Context) error
 type Context struct {
 	Task   *camundaclientgo.ResLockedExternalTask
 	client *camundaclientgo.Client
+}
+
+// BindVariables convert c.Variables to dest struct
+// for bind field shuold use tag `camunda:""`
+func (c *Context) BindVariables(dest interface{}) error {
+	rv := reflect.ValueOf(dest)
+	if rv.Kind() != reflect.Ptr || rv.IsNil() {
+		return ErrInvalidUnmarshal
+	}
+
+	if len(c.Task.Variables) == 0 {
+		return ErrEmptyVariables
+	}
+
+	rvelm := rv.Elem()
+	rt := rvelm.Type()
+	for i := 0; i < rt.NumField(); i++ {
+		field := rt.Field(i)
+		tag := field.Tag.Get(tagName)
+		cv, ok := c.Task.Variables[tag]
+		if !ok {
+			break
+		}
+		switch strings.ToLower(cv.Type) {
+		case "string", "str":
+			rvelm.Field(i).SetString(cv.Value.(string))
+		case "int", "integer":
+			rvelm.Field(i).SetInt(int64(cv.Value.(float64)))
+		case "number", "float":
+			rvelm.Field(i).SetFloat(cv.Value.(float64))
+		case "bool", "boolean":
+			rvelm.Field(i).SetBool(cv.Value.(bool))
+		}
+	}
+	return nil
 }
 
 // Complete a mark external task is complete
