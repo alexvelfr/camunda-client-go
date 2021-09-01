@@ -19,6 +19,19 @@ client := camunda_client_go.NewClient(camunda_client_go.ClientOptions{
 })
 ```
 
+or
+
+```go
+client := camunda_client_go.NewClientByCredentials(
+    "http://localhost:8080/engine-rest",
+    "login",
+    "pass",
+    false
+})
+```
+
+Note: if you need work with insecure HTTPS, should pass true in skipCertVerify
+
 Create deployment:
 
 ```go
@@ -104,6 +117,29 @@ proc.AddHandler(
         return nil
     },
 )
+```
+
+## Or use worker
+
+Start worker:
+
+```go
+handlers := make([]*worker.TopicHandler, 2)
+handlers = append(handlers,
+		&worker.TopicHandler{
+			Topic:   "topic1",
+			Handler: Topic1Handler,
+		},
+		&worker.TopicHandler{
+			Topic:   "topic2",
+			Handler: Topic2Handler,
+		},
+conf := worker.DefaultConfig()
+conf.Handlers = handlers
+w := worker.NewWorker(client, "w1", conf)
+ctx, cancl := context.WithCancel(context.Background())
+defer cancl()
+go w.Run(ctx)
 ```
 
 ## Features
