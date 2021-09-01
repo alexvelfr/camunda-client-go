@@ -2,6 +2,7 @@ package camunda_client_go
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,9 +13,10 @@ import (
 	"time"
 )
 
-const PackageVersion = "v0.0.2"
+const PackageVersion = "v0.0.3"
 const DefaultUserAgent = "CamundaClientGo/" + PackageVersion
 const DefaultEndpointUrl = "http://localhost:8080/engine-rest"
+const DefaultResourceUrl = "engine-rest"
 const DefaultTimeoutSec = 60
 const DefaultDateTimeFormat = "2006-01-02T15:04:05.000-0700"
 
@@ -40,6 +42,28 @@ type Client struct {
 	ProcessDefinition *ProcessDefinition
 	UserTask          *userTaskApi
 	Message           *Message
+}
+
+func NewClientByCredentials(url, user, password string, skipCertVerify bool) *Client {
+	if !strings.Contains(url, DefaultResourceUrl) {
+		if strings.HasSuffix(url, "/") {
+			url += DefaultResourceUrl
+		} else {
+			url += fmt.Sprintf("/%s", DefaultResourceUrl)
+		}
+	}
+	c := NewClient(ClientOptions{
+		EndpointUrl: url,
+		ApiUser:     user,
+		ApiPassword: password,
+		Timeout:     time.Second * 25,
+	})
+	if skipCertVerify {
+		transport := http.DefaultTransport.(*http.Transport).Clone()
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		c.SetCustomTransport(transport)
+	}
+	return c
 }
 
 var ErrorNotFound = &Error{
