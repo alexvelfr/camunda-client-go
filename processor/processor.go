@@ -1,6 +1,7 @@
 package processor
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -96,6 +97,12 @@ func (c *Context) BindVariables(dest interface{}) error {
 			rvelm.Field(i).SetFloat(cv.Value.(float64))
 		case "bool", "boolean":
 			rvelm.Field(i).SetBool(cv.Value.(bool))
+		case "obj", "object":
+			bt := []byte(cv.Value.(string))
+			err := json.Unmarshal(bt, rvelm.Field(i).Interface())
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
