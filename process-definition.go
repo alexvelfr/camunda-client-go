@@ -439,9 +439,16 @@ func (p *ProcessDefinition) UpdateHistoryTimeToLive(by QueryProcessDefinitionBy,
 }
 
 // Delete deletes a process definition from a deployment by id
-// https://docs.camunda.org/manual/latest/reference/rest/process-definition/delete-process-definition/#query-parameters
+// https://docs.camunda.org/manual/latest/reference/rest/process-instance/delete/
 func (p *ProcessDefinition) Delete(by QueryProcessDefinitionBy, query map[string]string) error {
 	_, err := p.client.doDelete("/process-definition/"+by.String(), query)
+	return err
+}
+
+// DeleteInstance deletes a process instance by id
+// https://docs.camunda.org/manual/latest/reference/rest/process-definition/delete-process-definition/#query-parameters
+func (p *ProcessDefinition) DeleteInstance(by QueryProcessDefinitionBy, query map[string]string) error {
+	_, err := p.client.doDelete("/process-instance/"+by.String(), query)
 	return err
 }
 
