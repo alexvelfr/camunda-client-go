@@ -445,10 +445,10 @@ func (p *ProcessDefinition) Delete(by QueryProcessDefinitionBy, query map[string
 	return err
 }
 
-// DeleteInstance deletes a process instance by id
+// DeleteInstanceByID deletes a process instance by id
 // https://docs.camunda.org/manual/latest/reference/rest/process-definition/delete-process-definition/#query-parameters
-func (p *ProcessDefinition) DeleteInstance(by QueryProcessDefinitionBy, query map[string]string) error {
-	_, err := p.client.doDelete("/process-instance/"+by.String(), query)
+func (p *ProcessDefinition) DeleteInstanceByID(id string, query map[string]string) error {
+	_, err := p.client.doDelete("/process-instance/"+id, query)
 	return err
 }
 
